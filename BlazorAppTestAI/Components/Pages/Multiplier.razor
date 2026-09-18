@@ -1,0 +1,71 @@
+﻿@page "/multiplier"
+@rendermode InteractiveServer
+
+<PageTitle>Multiplier</PageTitle>
+
+<h1>Multiplier</h1>
+
+<p role="status">Current value: @currentValue</p>
+
+<div class="mb-3">
+    <label class="form-label" for="factor">Factor</label>
+    <input id="factor" class="form-control" type="number" min="1" @bind="Factor" />
+</div>
+
+<div class="btn-group mb-4" role="group" aria-label="Multiplier controls">
+    <button class="btn btn-primary" @onclick="MultiplyValue">× @Factor</button>
+    <button class="btn btn-outline-secondary" @onclick="ResetValue" disabled="@(currentValue == 1)">Reset</button>
+</div>
+
+<h2 class="h4">Recent activity</h2>
+@if (history.Count == 0)
+{
+    <p class="text-muted">No changes yet.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var entry in history)
+        {
+            <li class="list-group-item">@entry</li>
+        }
+    </ul>
+}
+
+@code {
+    private const int MaximumHistoryEntries = 5;
+    private readonly List<string> history = [];
+    private long currentValue = 1;
+    private int factor = 2;
+
+    private int Factor
+    {
+        get => factor;
+        set => factor = Math.Max(1, value);
+    }
+
+    private void MultiplyValue()
+    {
+        var previousValue = currentValue;
+        currentValue *= Factor;
+        AddHistory($"Multiplied {previousValue} by {Factor}: {currentValue}");
+    }
+
+    private void ResetValue()
+    {
+        var previousValue = currentValue;
+        currentValue = 1;
+        AddHistory($"Reset from {previousValue} to 1");
+    }
+
+    private void AddHistory(string entry)
+    {
+        history.Insert(0, entry);
+
+        if (history.Count > MaximumHistoryEntries)
+        {
+            history.RemoveAt(MaximumHistoryEntries);
+        }
+    }
+
+}
