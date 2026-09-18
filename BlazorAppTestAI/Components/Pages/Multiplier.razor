@@ -1,0 +1,70 @@
+@page "/multiplier"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Multiplier</PageTitle>
+
+<h1>Multiplier</h1>
+
+<p>Enter two numbers to calculate their product.</p>
+
+<EditForm Model="numbers" OnValidSubmit="Multiply" OnInvalidSubmit="ClearResult" FormName="multiplier">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label" for="first-number">First number</label>
+        <InputNumber id="first-number" class="form-control" step="any" @bind-Value="numbers.First" />
+        <ValidationMessage For="@(() => numbers.First)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="second-number">Second number</label>
+        <InputNumber id="second-number" class="form-control" step="any" @bind-Value="numbers.Second" />
+        <ValidationMessage For="@(() => numbers.Second)" />
+    </div>
+
+    <div class="btn-group mb-4" role="group" aria-label="Multiplier controls">
+        <button type="submit" class="btn btn-primary">Multiply</button>
+        <button type="button" class="btn btn-outline-secondary" @onclick="Reset">Reset</button>
+    </div>
+</EditForm>
+
+<p role="status">@result</p>
+
+@code {
+    private Numbers numbers = new();
+    private string? result;
+
+    private void Multiply()
+    {
+        try
+        {
+            var product = numbers.First!.Value * numbers.Second!.Value;
+            result = $"{numbers.First} × {numbers.Second} = {product}";
+        }
+        catch (OverflowException)
+        {
+            result = "The result is too large. Try smaller numbers.";
+        }
+    }
+
+    private void ClearResult()
+    {
+        result = null;
+    }
+
+    private void Reset()
+    {
+        numbers = new();
+        ClearResult();
+    }
+
+    private sealed class Numbers
+    {
+        [Required(ErrorMessage = "Enter the first number.")]
+        public decimal? First { get; set; }
+
+        [Required(ErrorMessage = "Enter the second number.")]
+        public decimal? Second { get; set; }
+    }
+}
