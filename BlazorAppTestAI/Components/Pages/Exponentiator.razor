@@ -1,0 +1,71 @@
+@page "/exponentiator"
+@rendermode InteractiveServer
+
+<PageTitle>Exponentiator</PageTitle>
+
+<h1>Exponentiator</h1>
+
+<p role="status">Current value: @currentValue</p>
+
+<div class="mb-3">
+    <label class="form-label" for="exponent">Exponent</label>
+    <input id="exponent" class="form-control" type="number" min="0" @bind="Exponent" />
+</div>
+
+<div class="btn-group mb-4" role="group" aria-label="Exponentiator controls">
+    <button class="btn btn-primary" @onclick="RaiseValue">x^@Exponent</button>
+    <button class="btn btn-outline-secondary" @onclick="ResetValue" disabled="@(currentValue == 1)">Reset</button>
+</div>
+
+<h2 class="h4">Recent activity</h2>
+@if (history.Count == 0)
+{
+    <p class="text-muted">No changes yet.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var entry in history)
+        {
+            <li class="list-group-item">@entry</li>
+        }
+    </ul>
+}
+
+@code {
+    private const int MaximumHistoryEntries = 5;
+    private readonly List<string> history = [];
+    private long currentValue = 1;
+    private int exponent = 2;
+
+    private int Exponent
+    {
+        get => exponent;
+        set => exponent = Math.Max(0, value);
+    }
+
+    private void RaiseValue()
+    {
+        var previousValue = currentValue;
+        currentValue = (long)Math.Pow(currentValue, Exponent);
+        AddHistory($"Raised {previousValue} to the power of {Exponent}: {currentValue}");
+    }
+
+    private void ResetValue()
+    {
+        var previousValue = currentValue;
+        currentValue = 1;
+        AddHistory($"Reset from {previousValue} to 1");
+    }
+
+    private void AddHistory(string entry)
+    {
+        history.Insert(0, entry);
+
+        if (history.Count > MaximumHistoryEntries)
+        {
+            history.RemoveAt(MaximumHistoryEntries);
+        }
+    }
+
+}
